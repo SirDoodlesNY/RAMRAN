@@ -186,6 +186,20 @@
   }
   .foot .sign{ color:var(--amber-soft); }
 
+  /* ---------- coming-soon toast ---------- */
+  .toast{
+    position:fixed; left:50%; bottom:28px;
+    transform:translateX(-50%) translateY(12px);
+    background:#1b262b; color:var(--ink);
+    border:1px solid var(--panel-line); border-left:3px solid var(--amber);
+    font-size:12px; letter-spacing:.06em;
+    padding:12px 18px; border-radius:8px;
+    box-shadow:0 16px 40px -16px #000;
+    opacity:0; pointer-events:none; z-index:50;
+    transition:opacity .25s ease, transform .25s ease;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
   /* ---------- motion ---------- */
   @keyframes rise{ from{ opacity:0; transform:translateY(14px); } to{ opacity:1; transform:none; } }
   @keyframes ping{
@@ -240,7 +254,7 @@
       <a href="https://rocmesh.com">RocMesh.com</a>
       <a href="https://meshmap.net/">Mesh Map</a>             <!-- EDIT: point at your preferred map (RocMesh's map? your node?) -->
       <a href="mailto:hello@ramran.net">Email</a>            <!-- EDIT: your real @ramran.net address -->
-      <a href="guestbook.html">Guest Book</a>
+      <a href="#" id="gb-soon">Guest Book</a>
     </nav>
 
     <footer class="foot">
@@ -249,5 +263,21 @@
     </footer>
 
   </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">Guest book &mdash; coming soon. Check back!</div>
+
+  <script>
+    (function(){
+      var gb = document.getElementById("gb-soon");
+      var toast = document.getElementById("toast");
+      var timer;
+      gb.addEventListener("click", function(e){
+        e.preventDefault();
+        toast.classList.add("show");
+        clearTimeout(timer);
+        timer = setTimeout(function(){ toast.classList.remove("show"); }, 2600);
+      });
+    })();
+  </script>
 </body>
 </html>
