@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAMRAN · Meshtastic Station</title>
+<meta name="description" content="RAMRAN — Meshtastic mesh node and GMRS station WSLI610. Standing by.">
+
+<!-- ================= EDIT ME: the values below are the only things you'll change ================= -->
+<!--  Search for  EDIT:  comments throughout. Replace bracketed [ ... ] text with your real info,
+      or delete a line/cell you don't want shown.                                                  -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --case:        #0d1316;   /* equipment case / page bg     */
+    --case-deep:   #090d0f;   /* outer vignette               */
+    --panel:       #141d21;   /* the card surface             */
+    --panel-line:  #25343a;   /* hairline borders             */
+    --ink:         #e9e6dc;   /* primary readout (warm white) */
+    --ink-dim:     #7c8f94;   /* muted labels                 */
+    --ink-faint:   #4a5a5f;   /* faintest text                */
+    --amber:       #ffb02e;   /* VFD phosphor accent          */
+    --amber-soft:  #c9821f;   /* amber, dimmed                */
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{ margin:0; min-height:100%; }
+
+  body{
+    background:
+      radial-gradient(120% 90% at 50% 0%, #16211f 0%, var(--case) 45%, var(--case-deep) 100%);
+    color:var(--ink);
+    font-family:"JetBrains Mono", ui-monospace, monospace;
+    -webkit-font-smoothing:antialiased;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px 16px;
+    min-height:100vh;
+  }
+
+  /* ---------- the card ---------- */
+  .card{
+    width:100%;
+    max-width:620px;
+    background:
+      linear-gradient(180deg, #162025 0%, var(--panel) 60%);
+    border:1px solid var(--panel-line);
+    border-radius:14px;
+    padding:clamp(24px, 5vw, 44px);
+    position:relative;
+    overflow:hidden;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.03) inset,
+      0 30px 80px -40px #000;
+    animation:rise .7s cubic-bezier(.2,.7,.2,1) both;
+  }
+  /* faint equipment scanlines */
+  .card::after{
+    content:"";
+    position:absolute; inset:0;
+    background:repeating-linear-gradient(0deg, rgba(255,255,255,0.018) 0 1px, transparent 1px 4px);
+    pointer-events:none;
+  }
+
+  /* ---------- top status row ---------- */
+  .status{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    font-size:11px;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+  }
+  .standby{ display:inline-flex; align-items:center; gap:9px; color:var(--amber); }
+  .beacon{
+    width:8px; height:8px; border-radius:50%;
+    background:var(--amber);
+    box-shadow:0 0 0 0 rgba(255,176,46,.55);
+    animation:ping 2.4s ease-out infinite;
+  }
+  .qth{ color:var(--ink-faint); }  /* EDIT: grid locator below in HTML */
+
+  /* ---------- nameplate ---------- */
+  .plate{ margin:30px 0 0; }
+  .call{
+    font-family:"Saira Condensed", sans-serif;
+    font-weight:700;
+    font-size:clamp(58px, 19vw, 132px);
+    line-height:.86;
+    letter-spacing:.06em;
+    margin:0;
+    color:var(--ink);
+    text-shadow:0 0 26px rgba(255,176,46,.16);
+  }
+
+  /* ---------- morse strip (spells RAMRAN) ---------- */
+  .morse{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    margin:18px 2px 0;
+    height:10px;
+  }
+  .morse .ch{ display:flex; align-items:center; gap:5px; }
+  .morse .gap{ width:14px; }
+  .dot,.dash{ height:3px; background:var(--amber-soft); border-radius:2px; }
+  .dot{ width:3px; }
+  .dash{ width:13px; }
+
+  .sub{
+    margin:20px 0 0;
+    font-size:13px;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+  }
+  .sub b{ color:var(--ink); font-weight:500; }
+
+  /* ---------- spec panel ---------- */
+  .specs{
+    margin-top:34px;
+    border:1px solid var(--panel-line);
+    border-radius:8px;
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    overflow:hidden;
+  }
+  .cell{
+    padding:14px 16px;
+    border-right:1px solid var(--panel-line);
+    border-top:1px solid var(--panel-line);
+  }
+  .cell:nth-child(-n+3){ border-top:none; }
+  .cell:nth-child(3n){ border-right:none; }
+  .cell .k{
+    font-size:9.5px; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--ink-faint); margin-bottom:6px;
+  }
+  .cell .v{ font-size:14px; color:var(--ink); font-weight:500; }
+
+  /* ---------- links ---------- */
+  .links{ margin-top:30px; display:flex; flex-wrap:wrap; gap:10px; }
+  .links a{
+    flex:1 1 auto;
+    text-align:center;
+    min-width:120px;
+    padding:13px 16px;
+    border:1px solid var(--panel-line);
+    border-radius:7px;
+    color:var(--ink);
+    text-decoration:none;
+    font-size:12px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    transition:border-color .18s, color .18s, box-shadow .18s;
+  }
+  .links a:hover,.links a:focus-visible{
+    border-color:var(--amber);
+    color:var(--amber);
+    box-shadow:0 0 22px -8px rgba(255,176,46,.6);
+    outline:none;
+  }
+  .links a:focus-visible{ outline:2px solid var(--amber); outline-offset:2px; }
+
+  /* ---------- footer signoff ---------- */
+  .foot{
+    margin-top:30px;
+    padding-top:18px;
+    border-top:1px solid var(--panel-line);
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    gap:12px;
+    font-size:11px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+  }
+  .foot .sign{ color:var(--amber-soft); }
+
+  /* ---------- motion ---------- */
+  @keyframes rise{ from{ opacity:0; transform:translateY(14px); } to{ opacity:1; transform:none; } }
+  @keyframes ping{
+    0%{   box-shadow:0 0 0 0 rgba(255,176,46,.5); }
+    70%{  box-shadow:0 0 0 9px rgba(255,176,46,0); }
+    100%{ box-shadow:0 0 0 0 rgba(255,176,46,0); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .card{ animation:none; }
+    .beacon{ animation:none; }
+  }
+</style>
+</head>
+<body>
+  <main class="card">
+
+    <div class="status">
+      <span class="standby"><span class="beacon"></span>Standing by</span>
+      <!-- EDIT: Maidenhead grid locator. FN13 ≈ Rochester NY region (coarse, not your address). Change or delete. -->
+      <span class="qth">Grid&nbsp;FN13</span>
+    </div>
+
+    <div class="plate">
+      <h1 class="call">RAMRAN</h1>
+
+      <!-- Morse strip = R A M R A N  (decorative; leave as-is) -->
+      <div class="morse" aria-hidden="true">
+        <span class="ch"><i class="dot"></i><i class="dash"></i><i class="dot"></i></span><span class="gap"></span>
+        <span class="ch"><i class="dot"></i><i class="dash"></i></span><span class="gap"></span>
+        <span class="ch"><i class="dash"></i><i class="dash"></i></span><span class="gap"></span>
+        <span class="ch"><i class="dot"></i><i class="dash"></i><i class="dot"></i></span><span class="gap"></span>
+        <span class="ch"><i class="dot"></i><i class="dash"></i></span><span class="gap"></span>
+        <span class="ch"><i class="dash"></i><i class="dot"></i></span>
+      </div>
+
+      <!-- EDIT: subtitle line -->
+      <p class="sub">Meshtastic node <b>—</b> RAMRAN <b>(R29D)</b></p>
+    </div>
+
+    <!-- EDIT: any of these 6 cells. Change the .v value, or delete a whole .cell block. -->
+    <section class="specs">
+      <div class="cell"><div class="k">Network</div><div class="v">Meshtastic</div></div>
+      <div class="cell"><div class="k">Band</div><div class="v">915 MHz</div></div>
+      <div class="cell"><div class="k">Preset</div><div class="v">LongFast</div></div>
+      <div class="cell"><div class="k">Hardware</div><div class="v">RAK / Heltec / Seeed Studio</div></div>
+      <div class="cell"><div class="k">Region</div><div class="v">US / NY</div></div>
+      <div class="cell"><div class="k">Status</div><div class="v">Monitoring</div></div>
+    </section>
+
+    <!-- EDIT: links. Replace href values. Delete any you don't want. -->
+    <nav class="links">
+      <a href="https://rocmesh.com">RocMesh</a>
+      <a href="mailto:hello@ramran.net">Email</a>            <!-- EDIT: your real @ramran.net address -->
+      <a href="#">Mesh Map</a>                               <!-- EDIT: link to your node/map, or delete -->
+    </nav>
+
+    <footer class="foot">
+      <span class="sign">73 · de RAMRAN</span>
+      <span>ramran.net</span>
+    </footer>
+
+  </main>
+</body>
+</html>
