@@ -223,12 +223,12 @@
     try{
       const r=await fetch(API+"/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:passInput.value})});
       const d=await r.json();
-      if(d.ok){ token=d.token; lsSet(KEY,token); adminMode=true; passInput.value=""; adminNote.textContent=""; syncAdmin(); load(); }
+      if(d.ok){ token=d.token; lsSet(KEY,token); adminMode=true; passInput.value=""; adminNote.textContent=""; syncAdmin(); panel.hidden=true; load(); }
       else{ adminNote.textContent="Wrong password."; adminNote.className="note err"; }
     }catch{ adminNote.textContent="Login failed."; adminNote.className="note err"; }
   });
 
-  function doLogout(){ token=null; adminMode=false; lsDel(KEY); syncAdmin(); load(); }
+  function doLogout(){ token=null; adminMode=false; lsDel(KEY); syncAdmin(); panel.hidden=true; load(); }
   $("admin-logout-btn").addEventListener("click", doLogout);
 
   syncAdmin();
