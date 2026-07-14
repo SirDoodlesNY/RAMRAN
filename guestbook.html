@@ -40,9 +40,9 @@
   }
   .card > *{ position:relative; z-index:1; }
 
-  .back{ display:inline-flex; align-items:center; gap:7px; font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-dim); text-decoration:none; transition:color .18s; }
-  .back:hover,.back:focus-visible{ color:var(--amber); outline:none; }
-  .back:focus-visible{ outline:2px solid var(--amber); outline-offset:3px; }
+  .back{ display:inline-flex; align-items:center; gap:8px; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink); text-decoration:none; border:1px solid var(--panel-line); border-radius:7px; padding:9px 16px; transition:border-color .18s, color .18s, box-shadow .18s; }
+  .back:hover,.back:focus-visible{ border-color:var(--amber); color:var(--amber); box-shadow:0 0 22px -8px rgba(255,176,46,.6); outline:none; }
+  .back:focus-visible{ outline:2px solid var(--amber); outline-offset:2px; }
 
   .status{ display:inline-flex; align-items:center; gap:9px; margin-top:26px; font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--green); }
   .beacon{ width:8px; height:8px; border-radius:50%; background:var(--green); animation:ping 2.4s ease-out infinite; }
@@ -94,7 +94,7 @@
 <body>
   <main class="card">
 
-    <a class="back" href="index.html">&larr; RAMRAN</a>
+    <a class="back" href="index.html">&larr; Back</a>
 
     <div class="status"><span class="beacon"></span>Logbook open</div>
     <h1 class="logtitle">Station log</h1>
@@ -103,7 +103,7 @@
     <form id="gb-form" autocomplete="off">
       <div>
         <label for="gb-name">Callsign / name</label>
-        <input id="gb-name" name="name" maxlength="40" required placeholder="e.g. WSLI610">
+        <input id="gb-name" name="name" maxlength="40" required placeholder="e.g. R29D">
       </div>
       <div>
         <label for="gb-msg">Message</label>
