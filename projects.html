@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAMRAN · Projects</title>
+<meta name="description" content="What RAMRAN is building on the mesh — hardware, network, and web projects.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --case:#0d1316; --case-deep:#090d0f; --panel:#141d21; --panel-line:#25343a;
+    --field:#0f171a; --ink:#e9e6dc; --ink-dim:#7c8f94; --ink-faint:#4a5a5f;
+    --amber:#ffb02e; --amber-soft:#c9821f; --green:#3ddc84; --blue:#5ab0d0;
+  }
+  *{ box-sizing:border-box; }
+  [hidden]{ display:none !important; }
+  html,body{ margin:0; min-height:100%; }
+  body{
+    background:radial-gradient(120% 90% at 50% 0%, #16211f 0%, var(--case) 45%, var(--case-deep) 100%);
+    color:var(--ink); font-family:"JetBrains Mono", ui-monospace, monospace;
+    -webkit-font-smoothing:antialiased; display:flex; justify-content:center;
+    padding:24px 16px; min-height:100vh;
+  }
+  .card{
+    width:100%; max-width:660px; align-self:flex-start;
+    background:linear-gradient(180deg, #162025 0%, var(--panel) 60%);
+    border:1px solid var(--panel-line); border-radius:14px;
+    padding:clamp(24px, 5vw, 44px); position:relative; overflow:hidden;
+    box-shadow:0 1px 0 rgba(255,255,255,0.03) inset, 0 30px 80px -40px #000;
+    animation:rise .7s cubic-bezier(.2,.7,.2,1) both;
+  }
+  .card::after{ content:""; position:absolute; inset:0; background:repeating-linear-gradient(0deg, rgba(255,255,255,0.018) 0 1px, transparent 1px 4px); pointer-events:none; }
+  .card > *{ position:relative; z-index:1; }
+
+  .back{ display:inline-flex; align-items:center; gap:8px; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink); text-decoration:none; border:1px solid var(--panel-line); border-radius:7px; padding:9px 16px; transition:border-color .18s, color .18s, box-shadow .18s; }
+  .back:hover,.back:focus-visible{ border-color:var(--amber); color:var(--amber); box-shadow:0 0 22px -8px rgba(255,176,46,.6); outline:none; }
+  .back:focus-visible{ outline:2px solid var(--amber); outline-offset:2px; }
+
+  .status{ display:inline-flex; align-items:center; gap:9px; margin-top:26px; font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--amber); }
+  .beacon{ width:8px; height:8px; border-radius:50%; background:var(--amber); animation:ping 2.4s ease-out infinite; }
+  .title{ font-family:"Saira Condensed", sans-serif; font-weight:700; font-size:clamp(40px, 12vw, 78px); line-height:.9; letter-spacing:.05em; margin:14px 0 0; text-shadow:0 0 26px rgba(255,176,46,.14); }
+  .lede{ margin:16px 0 0; font-size:13px; line-height:1.6; color:var(--ink-dim); }
+  .lede b{ color:var(--ink); font-weight:500; }
+
+  /* new-project form (admin) */
+  .newproj{ margin-top:26px; padding:18px; border:1px dashed var(--panel-line); border-radius:10px; }
+  .newproj h4{ margin:0 0 12px; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--amber); font-weight:500; }
+  .grid2{ display:flex; gap:10px; flex-wrap:wrap; }
+  .grid2 > *{ flex:1 1 180px; }
+  label{ display:block; font-size:9.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-faint); margin:10px 0 6px; }
+  input,textarea,select{ width:100%; background:var(--field); color:var(--ink); border:1px solid var(--panel-line); border-radius:7px; font-family:inherit; font-size:14px; padding:10px 12px; resize:vertical; }
+  input:focus,textarea:focus,select:focus{ outline:none; border-color:var(--amber); box-shadow:0 0 0 1px var(--amber); }
+  textarea{ min-height:44px; }
+
+  .send{ background:transparent; color:var(--ink); cursor:pointer; border:1px solid var(--panel-line); border-radius:7px; font-family:inherit; font-size:12px; letter-spacing:.14em; text-transform:uppercase; padding:11px 20px; transition:border-color .18s, color .18s, box-shadow .18s; }
+  .send:hover,.send:focus-visible{ border-color:var(--amber); color:var(--amber); box-shadow:0 0 22px -8px rgba(255,176,46,.6); outline:none; }
+  .send:disabled{ opacity:.5; cursor:default; }
+  .send.sm{ padding:7px 12px; font-size:11px; }
+  .note{ font-size:11px; letter-spacing:.04em; color:var(--ink-faint); min-height:14px; margin-top:8px; }
+  .note.err{ color:#e8895f; } .note.ok{ color:var(--amber-soft); }
+
+  /* project cards */
+  .list{ margin-top:20px; }
+  .project{ border:1px solid var(--panel-line); border-radius:10px; padding:18px; margin-top:16px; }
+  .ptop{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .tag{ font-size:9px; letter-spacing:.16em; text-transform:uppercase; padding:3px 8px; border-radius:4px; border:1px solid var(--panel-line); }
+  .tag.active{ color:var(--green); border-color:rgba(61,220,132,.45); }
+  .tag.planning{ color:var(--blue); border-color:rgba(90,176,208,.45); }
+  .tag.onhold{ color:var(--amber); border-color:rgba(255,176,46,.45); }
+  .tag.done{ color:var(--ink-dim); border-color:var(--panel-line); }
+  .cat{ font-size:9.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-faint); }
+  .like{ display:inline-flex; align-items:center; gap:6px; margin-left:auto; background:none; border:1px solid var(--panel-line); border-radius:20px; color:var(--ink-dim); cursor:pointer; font-family:inherit; font-size:12px; padding:4px 12px; transition:border-color .18s, color .18s; }
+  .like:hover{ border-color:#e8607a; color:#e8607a; }
+  .like.liked{ color:#e8607a; border-color:rgba(232,96,122,.5); cursor:default; }
+  .like .heart{ font-size:13px; line-height:1; }
+  .like .count{ font-variant-numeric:tabular-nums; }
+  .pname{ font-family:"Saira Condensed", sans-serif; font-weight:600; font-size:26px; line-height:1; letter-spacing:.02em; margin:10px 0 6px; }
+  .psummary{ font-size:13px; color:var(--ink-dim); line-height:1.55; white-space:pre-wrap; }
+
+  .updates{ margin-top:14px; border-top:1px solid var(--panel-line); padding-top:6px; }
+  .update{ display:flex; gap:14px; padding:9px 0; border-bottom:1px solid rgba(37,52,58,.5); }
+  .update:last-child{ border-bottom:none; }
+  .u-when{ color:var(--ink-faint); white-space:nowrap; font-size:10px; letter-spacing:.06em; padding-top:2px; min-width:74px; }
+  .u-text{ color:var(--ink); font-size:13px; line-height:1.5; white-space:pre-wrap; word-break:break-word; flex:1; }
+  .no-updates{ font-size:12px; color:var(--ink-faint); padding:6px 0; }
+
+  /* admin per-project controls */
+  .adminctl{ margin-top:14px; padding-top:12px; border-top:1px dashed var(--panel-line); display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .adminctl select{ width:auto; padding:6px 8px; font-size:12px; }
+  .addupd{ display:flex; gap:8px; margin-top:10px; }
+  .addupd input{ flex:1; }
+  .del{ background:none; border:1px solid var(--panel-line); color:var(--ink-faint); border-radius:6px; cursor:pointer; font-family:inherit; font-size:12px; line-height:1; padding:4px 9px; transition:border-color .18s,color .18s; }
+  .del:hover{ border-color:#e8895f; color:#e8895f; }
+  .u-del{ align-self:flex-start; }
+
+  .empty{ padding:26px 2px; color:var(--ink-dim); font-size:13px; }
+
+  /* admin login */
+  .adminpanel{ margin-top:26px; padding:16px; border:1px solid var(--panel-line); border-radius:8px; background:rgba(255,255,255,0.02); }
+  .adminrow{ display:flex; gap:10px; margin-top:8px; align-items:center; flex-wrap:wrap; }
+  .adminrow input{ flex:1 1 180px; }
+  .adminon{ color:var(--amber); font-size:11px; letter-spacing:.18em; text-transform:uppercase; }
+  .adminlink{ color:var(--ink-faint); text-decoration:none; }
+  .adminlink:hover{ color:var(--amber); }
+
+  .foot{ margin-top:30px; padding-top:18px; border-top:1px solid var(--panel-line); display:flex; justify-content:space-between; align-items:baseline; gap:12px; font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-faint); }
+  .foot .sign{ color:var(--amber-soft); }
+
+  @keyframes rise{ from{ opacity:0; transform:translateY(14px); } to{ opacity:1; transform:none; } }
+  @keyframes ping{ 0%{ box-shadow:0 0 0 0 rgba(255,176,46,.5); } 70%{ box-shadow:0 0 0 9px rgba(255,176,46,0); } 100%{ box-shadow:0 0 0 0 rgba(255,176,46,0); } }
+  @media (prefers-reduced-motion: reduce){ .card{ animation:none; } .beacon{ animation:none; } }
+</style>
+</head>
+<body>
+  <main class="card">
+
+    <a class="back" href="index.html">&larr; Back</a>
+
+    <div class="status"><span class="beacon"></span>On the bench</div>
+    <h1 class="title">Projects</h1>
+    <p class="lede">What I'm building on the mesh — <b>hardware, network, and web</b>. Newest updates on top.</p>
+
+    <!-- admin: new project (hidden unless logged in) -->
+    <div class="newproj" id="newproj" hidden>
+      <h4>+ New project</h4>
+      <div class="grid2">
+        <div>
+          <label for="np-title">Title</label>
+          <input id="np-title" maxlength="80" placeholder="West Sparta Solar Relay">
+        </div>
+        <div>
+          <label for="np-cat">Category</label>
+          <input id="np-cat" maxlength="24" placeholder="Hardware / Network / Antenna / Web">
+        </div>
+      </div>
+      <label for="np-status">Status</label>
+      <select id="np-status">
+        <option value="planning">Planning</option>
+        <option value="active">Active</option>
+        <option value="onhold">On hold</option>
+        <option value="done">Done</option>
+      </select>
+      <label for="np-summary">Summary</label>
+      <textarea id="np-summary" maxlength="400" placeholder="Off-grid repeater node at ~1,700 ft..."></textarea>
+      <div style="margin-top:12px"><button class="send" id="np-create" type="button">Create project</button></div>
+      <div class="note" id="np-note"></div>
+    </div>
+
+    <section class="list" id="list"></section>
+
+    <!-- admin login -->
+    <div class="adminpanel" id="adminpanel" hidden>
+      <div id="admin-login">
+        <label for="admin-pass">Admin login</label>
+        <div class="adminrow">
+          <input id="admin-pass" type="password" placeholder="password" autocomplete="current-password">
+          <button class="send" id="admin-login-btn" type="button">Log in</button>
+        </div>
+        <div class="note" id="admin-note"></div>
+      </div>
+      <div id="admin-loggedin" class="adminrow" hidden>
+        <span class="adminon">&#9673; Admin mode — editing enabled</span>
+        <button class="send" id="admin-logout-btn" type="button">Log out</button>
+      </div>
+    </div>
+
+    <footer class="foot">
+      <span class="sign">73 &middot; de RAMRAN</span>
+      <span><a href="#" id="admin-toggle" class="adminlink">admin</a> &middot; ramran.net</span>
+    </footer>
+
+  </main>
+
+<script>
+  const API = "https://ramran-guestbook.rocareameshradioantennanetwork.workers.dev";
+  const $ = id => document.getElementById(id);
+
+  const list=$("list"), panel=$("adminpanel"), loginBox=$("admin-login"),
+        loggedBox=$("admin-loggedin"), passInput=$("admin-pass"), adminNote=$("admin-note"),
+        newproj=$("newproj");
+
+  const KEY = "gb_admin_token";           // same key as guest book: one login covers both
+  const lsGet=k=>{try{return localStorage.getItem(k);}catch{return null;}};
+  const lsSet=(k,v)=>{try{localStorage.setItem(k,v);}catch{}};
+  const lsDel=k=>{try{localStorage.removeItem(k);}catch{}};
+
+  const LIKED_KEY="gb_liked";
+  const getLiked=()=>{ try{ return JSON.parse(localStorage.getItem(LIKED_KEY)||"[]"); }catch{ return []; } };
+  const hasLiked=id=>getLiked().includes(id);
+  const addLiked=id=>{ try{ const s=getLiked(); if(!s.includes(id)){ s.push(id); localStorage.setItem(LIKED_KEY,JSON.stringify(s)); } }catch{} };
+  async function likeProject(p, btn, countEl){
+    if(hasLiked(p.id)) return;
+    addLiked(p.id);
+    btn.classList.add("liked"); btn.title="You liked this";
+    countEl.textContent=String((parseInt(countEl.textContent,10)||0)+1);
+    try{
+      const r=await fetch(API+"/projects/like",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({projectId:p.id})});
+      const d=await r.json();
+      if(d && d.ok && typeof d.likes==="number") countEl.textContent=String(d.likes);
+    }catch{}
+  }
+
+  let token = lsGet(KEY);
+  let adminMode = !!token;
+
+  const STATUS_LABEL = { planning:"Planning", active:"Active", onhold:"On hold", done:"Done" };
+
+  function fmtDate(ts){ try{ return new Date(ts).toISOString().slice(0,10); }catch{ return ""; } }
+  function authHeaders(){ return { "Content-Type":"application/json", "Authorization":"Bearer "+token }; }
+
+  function el(tag, cls, text){ const e=document.createElement(tag); if(cls)e.className=cls; if(text!=null)e.textContent=text; return e; }
+
+  function render(projects){
+    list.textContent="";
+    if(!projects.length){
+      list.appendChild(el("div","empty","Nothing posted yet — check back soon."));
+      return;
+    }
+    for(const p of projects){
+      const card=el("div","project");
+
+      const top=el("div","ptop");
+      const tag=el("span","tag "+(p.status||"planning"), STATUS_LABEL[p.status]||"Planning");
+      top.appendChild(tag);
+      if(p.category) top.appendChild(el("span","cat",p.category));
+      const liked=hasLiked(p.id);
+      const likeBtn=document.createElement("button");
+      likeBtn.className="like"+(liked?" liked":""); likeBtn.type="button";
+      likeBtn.title=liked?"You liked this":"Like this project";
+      const heart=el("span","heart","\u2665");
+      const cnt=el("span","count",String(p.likes||0));
+      likeBtn.append(heart,cnt);
+      likeBtn.addEventListener("click",()=>likeProject(p,likeBtn,cnt));
+      top.appendChild(likeBtn);
+      card.appendChild(top);
+
+      card.appendChild(el("div","pname",p.title));
+      if(p.summary) card.appendChild(el("div","psummary",p.summary));
+
+      // updates
+      const ups=el("div","updates");
+      const list_u = p.updates||[];
+      if(!list_u.length){ ups.appendChild(el("div","no-updates","No updates yet.")); }
+      for(const u of list_u){
+        const row=el("div","update");
+        row.appendChild(el("span","u-when",fmtDate(u.ts)));
+        row.appendChild(el("div","u-text",u.text));
+        if(adminMode){
+          const d=el("button","del u-del","\u2715"); d.type="button"; d.title="Delete update";
+          d.addEventListener("click",()=>delUpdate(p.id,u.id));
+          row.appendChild(d);
+        }
+        ups.appendChild(row);
+      }
+      card.appendChild(ups);
+
+      // admin controls
+      if(adminMode){
+        const ctl=el("div","adminctl");
+        const sel=document.createElement("select");
+        for(const s of ["planning","active","onhold","done"]){
+          const o=document.createElement("option"); o.value=s; o.textContent=STATUS_LABEL[s];
+          if(p.status===s)o.selected=true; sel.appendChild(o);
+        }
+        sel.addEventListener("change",()=>editStatus(p.id,sel.value));
+        ctl.appendChild(sel);
+        const del=el("button","del","Delete project"); del.type="button";
+        del.addEventListener("click",()=>delProject(p.id,p.title));
+        ctl.appendChild(del);
+        card.appendChild(ctl);
+
+        const add=el("div","addupd");
+        const inp=document.createElement("input"); inp.placeholder="Add an update…"; inp.maxLength=1000;
+        const btn=el("button","send sm","Post"); btn.type="button";
+        const post=()=>{ if(inp.value.trim()){ addUpdate(p.id, inp.value.trim()); inp.value=""; } };
+        btn.addEventListener("click",post);
+        inp.addEventListener("keydown",e=>{ if(e.key==="Enter") post(); });
+        add.append(inp,btn);
+        card.appendChild(add);
+      }
+
+      list.appendChild(card);
+    }
+  }
+
+  async function load(){
+    try{ const r=await fetch(API+"/projects"); render(await r.json()); }
+    catch{ list.innerHTML='<div class="empty">Projects unavailable right now. Try again shortly.</div>'; }
+  }
+
+  async function apiPost(pathSeg, body){
+    const r=await fetch(API+pathSeg,{ method:"POST", headers:authHeaders(), body:JSON.stringify(body) });
+    if(r.status===401){ doLogout(); alert("Admin session expired — please log in again."); throw new Error("401"); }
+    return r.json();
+  }
+
+  // create project
+  $("np-create").addEventListener("click", async ()=>{
+    const title=$("np-title").value.trim();
+    const note=$("np-note"); note.className="note";
+    if(!title){ note.textContent="Give it a title."; note.className="note err"; return; }
+    try{
+      const d=await apiPost("/projects",{ title, category:$("np-cat").value.trim(), status:$("np-status").value, summary:$("np-summary").value.trim() });
+      if(d.ok){ $("np-title").value=""; $("np-cat").value=""; $("np-summary").value=""; $("np-status").value="planning"; note.textContent="Project added."; note.className="note ok"; load(); }
+      else{ note.textContent=d.error||"Could not create."; note.className="note err"; }
+    }catch{}
+  });
+
+  async function addUpdate(projectId, text){ try{ const d=await apiPost("/projects/update",{projectId,text}); if(d.ok) load(); }catch{} }
+  async function editStatus(projectId, status){ try{ await apiPost("/projects/edit",{projectId,status}); load(); }catch{} }
+  async function delUpdate(projectId, updateId){ if(!confirm("Delete this update?"))return; try{ const d=await apiPost("/projects/delete",{projectId,updateId}); if(d.ok) load(); }catch{} }
+  async function delProject(projectId, title){ if(!confirm('Delete the whole project "'+title+'" and all its updates?'))return; try{ const d=await apiPost("/projects/delete",{projectId}); if(d.ok) load(); }catch{} }
+
+  // admin login plumbing
+  function syncAdmin(){ loginBox.hidden=adminMode; loggedBox.hidden=!adminMode; newproj.hidden=!adminMode; }
+  $("admin-toggle").addEventListener("click", e=>{ e.preventDefault(); panel.hidden=!panel.hidden; syncAdmin(); });
+  $("admin-login-btn").addEventListener("click", async ()=>{
+    adminNote.className="note"; adminNote.textContent="Checking…";
+    try{
+      const r=await fetch(API+"/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password:passInput.value})});
+      const d=await r.json();
+      if(d.ok){ token=d.token; lsSet(KEY,token); adminMode=true; passInput.value=""; adminNote.textContent=""; syncAdmin(); panel.hidden=true; load(); }
+      else{ adminNote.textContent="Wrong password."; adminNote.className="note err"; }
+    }catch{ adminNote.textContent="Login failed."; adminNote.className="note err"; }
+  });
+  function doLogout(){ token=null; adminMode=false; lsDel(KEY); syncAdmin(); panel.hidden=true; load(); }
+  $("admin-logout-btn").addEventListener("click", doLogout);
+
+  syncAdmin();
+  load();
+</script>
+</body>
+</html>
